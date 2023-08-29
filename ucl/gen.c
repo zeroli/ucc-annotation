@@ -4,7 +4,7 @@
 #define IsCommute(op) 0
 
 BBlock CurrentBB;
-int OPMap[] = 
+int OPMap[] =
 {
 #define OPINFO(tok, prec, name, func, opcode) opcode,
 #include "opinfo.h"
@@ -80,6 +80,7 @@ void StartBBlock(BBlock bb)
 	CurrentBB->next = bb;
 	bb->prev = CurrentBB;
 	lasti = CurrentBB->insth.prev;
+	// 不是jmp/branch，就是fall through，连接当前block和这个接下来的block
 	if (lasti->opcode != JMP && lasti->opcode != IJMP)
 	{
 		DrawCFGEdge(CurrentBB, bb);
@@ -90,7 +91,10 @@ void StartBBlock(BBlock bb)
 void AppendInst(IRInst inst)
 {
 	assert(CurrentBB != NULL);
-
+	// 添加`inst`到双向循环链表的尾
+	// `CurrentBB->insth`是链表头
+	// 它的prev就是链表尾
+	// tail <=> CurrentBB->insth <=> n1 <=> n2 <=> ... <=> tail <=> (CurrentBB->insth)
 	CurrentBB->insth.prev->next = inst;
 	inst->prev = CurrentBB->insth.prev;
 	inst->next = &CurrentBB->insth;
@@ -191,7 +195,7 @@ void GenerateIndirectJump(BBlock *dstBBs, int len, Symbol index)
 {
 	IRInst inst;
 	int i;
-	
+
 	ALLOC(inst);
 	index->ref++;
 	for (i = 0; i < len; ++i)
@@ -269,14 +273,14 @@ Symbol AddressOf(Symbol p)
 	{
 		TrackValueChange(p);
 	}
-	return TryAddValue(T(POINTER), ADDR, p, NULL); 
+	return TryAddValue(T(POINTER), ADDR, p, NULL);
 }
 
 
 Symbol Deref(Type ty, Symbol addr)
 {
 	Symbol tmp;
-	
+
 	if (addr->kind == SK_Temp && AsVar(addr)->def->op == ADDR)
 	{
 		return AsVar(addr)->def->src1;

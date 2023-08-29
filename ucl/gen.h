@@ -3,16 +3,19 @@
 
 enum OPCode
 {
-#define OPCODE(code, name, func) code, 
-#include "opcode.h" 
+#define OPCODE(code, name, func) code,
+#include "opcode.h"
 #undef OPCODE
 };
 
 typedef struct irinst
 {
+	// 所有指令形成双向链表
 	struct irinst *prev;
 	struct irinst *next;
+	// 指令操作结果数据类型
 	Type ty;
+	// 3地址码操作指令
 	int opcode;
 	Symbol opds[3];
 } *IRInst;
@@ -25,11 +28,14 @@ typedef struct cfgedge
 
 struct bblock
 {
+	// 所有的block形成一个双向链表
 	struct bblock *prev;
 	struct bblock *next;
 	Symbol sym;
+	// 每个block有前驱和后继
 	CFGEdge succs;
 	CFGEdge preds;
+	// block当然有指令序列，双向链表
 	struct irinst insth;
 	int ninst;
 	int nsucc;
@@ -76,4 +82,3 @@ extern BBlock CurrentBB;
 extern int OPMap[];
 
 #endif
-

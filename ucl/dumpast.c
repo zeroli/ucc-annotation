@@ -5,6 +5,7 @@
 #include "stmt.h"
 #include "output.h"
 
+// LISP风格的ast printer
 static void DumpExpression(AstExpression expr, int pos)
 {
 	char *opname = NULL;
@@ -31,26 +32,26 @@ static void DumpExpression(AstExpression expr, int pos)
 	case OP_RSHIFT_ASSIGN:
 	case OP_ADD_ASSIGN:
 	case OP_SUB_ASSIGN:
-	case OP_MUL_ASSIGN:    
+	case OP_MUL_ASSIGN:
 	case OP_DIV_ASSIGN:
 	case OP_MOD_ASSIGN:
-	case OP_OR:     
+	case OP_OR:
 	case OP_AND:
-	case OP_BITOR:  
-	case OP_BITXOR:  
-	case OP_BITAND:	
-	case OP_EQUAL:  
-	case OP_UNEQUAL: 
-	case OP_GREAT: 
-	case OP_LESS: 
-	case OP_GREAT_EQ: 
+	case OP_BITOR:
+	case OP_BITXOR:
+	case OP_BITAND:
+	case OP_EQUAL:
+	case OP_UNEQUAL:
+	case OP_GREAT:
+	case OP_LESS:
+	case OP_GREAT_EQ:
 	case OP_LESS_EQ:
-	case OP_LSHIFT: 
-	case OP_RSHIFT: 
-	case OP_ADD:   
+	case OP_LSHIFT:
+	case OP_RSHIFT:
+	case OP_ADD:
 	case OP_SUB:
-	case OP_MUL:    
-	case OP_DIV: 
+	case OP_MUL:
+	case OP_DIV:
 	case OP_MOD:
 	case OP_INDEX:
 
@@ -83,13 +84,13 @@ static void DumpExpression(AstExpression expr, int pos)
 		}
 		break;
 
-	case OP_PREINC: 
-	case OP_PREDEC: 
-	case OP_POS:    
+	case OP_PREINC:
+	case OP_PREDEC:
+	case OP_POS:
 	case OP_NEG:
-	case OP_NOT:     
+	case OP_NOT:
 	case OP_COMP:
-	case OP_ADDRESS: 
+	case OP_ADDRESS:
 	case OP_DEREF:
 
 		fprintf(ASTFile, "(%s ", opname);

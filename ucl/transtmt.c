@@ -87,7 +87,7 @@ static void TranslateCaseStatement(AstStatement stmt)
 static void TranslateDefaultStatement(AstStatement stmt)
 {
 	AstDefaultStatement defStmt = AsDef(stmt);
-	
+
 	/// see TranslateSwitchStatement, which already creates a basic block
 	/// to associate with the default statement in a switch
 	StartBBlock(defStmt->respBB);
@@ -102,7 +102,7 @@ static void TranslateDefaultStatement(AstStatement stmt)
  * trueBB:
  *     stmt
  * nextBB:
- *     ...     
+ *     ...
  *
  * if (expr) stmt1 else stmt2 is translated into:
  *     if ! expr goto falseBB
@@ -274,13 +274,14 @@ static void TranslateGotoStatement(AstStatement stmt)
 {
 	AstGotoStatement gotoStmt = AsGoto(stmt);
 
-	/// if there is no basic block associated with the label, 
+	/// if there is no basic block associated with the label,
 	/// create a basic block to associate with it
 	if (gotoStmt->label->respBB == NULL)
 	{
 		gotoStmt->label->respBB = CreateBBlock();
 	}
 	GenerateJump(gotoStmt->label->respBB);
+	// goto完之后，启动一个新的block
 	StartBBlock(CreateBBlock());
 }
 
@@ -376,7 +377,7 @@ static int MergeSwitchBucket(SwitchBucket *pBucket)
  * if choice > 11, goto right half [24]
  * generate indirect jump to each case statement and default label
  */
-static void TranslateSwitchBuckets(SwitchBucket *bucketArray, int left, int right, 
+static void TranslateSwitchBuckets(SwitchBucket *bucketArray, int left, int right,
                                    Symbol choice, BBlock currBB, BBlock defBB)
 {
 	int mid, len, i;
@@ -445,17 +446,17 @@ static void TranslateSwitchBuckets(SwitchBucket *bucketArray, int left, int righ
  * and a case statement with maximum value(maxVal). We define the density of the switch bucket to be:
  * density = number of case statements / (maxVal - minVal). The density of a switch bucket must be greater
  * than 1/2.
- * And when adding new case statements into a switch bucket, there is a chance that the switch bucket can be 
+ * And when adding new case statements into a switch bucket, there is a chance that the switch bucket can be
  * merged with previous switch buckets.
- * 
+ *
  * Given the following switch statement:
  * switch (a) { case 0: case 1: case 4: case 9: case 10: case 11: ... };
- * [0, 1, 4] will be the first bucket, since 3 / (4 - 0) > 1/2. 
+ * [0, 1, 4] will be the first bucket, since 3 / (4 - 0) > 1/2.
  * 9 will starts a new bucket, since 4 / (9 - 0) < 1/2. But when encountering 11, 6 / (11 - 0) > 1/2
  * So the merged bucket will be [0, 1, 4, 9, 10, 11]
  *
  * The second step generates the selection and jump code to different switch buckets(See TranslateSwitchBuckets)
- * 
+ *
  * The final step generates the intermediate code for the enclosed statement.
  */
 static void TranslateSwitchStatement(AstStatement stmt)
@@ -574,6 +575,7 @@ static void TranslateCompoundStatement(AstStatement stmt)
 		}
 	}
 
+	// 依次转换每条语句
 	while (p)
 	{
 		TranslateStatement((AstStatement)p);
@@ -582,7 +584,8 @@ static void TranslateCompoundStatement(AstStatement stmt)
 
 }
 
-static void (* StmtTrans[])(AstStatement) = 
+// 每个语句类型对应一个语句转换函数，查表
+static void (* StmtTrans[])(AstStatement) =
 {
 	TranslateExpressionStatement,
 	TranslateLabelStatement,
@@ -614,11 +617,13 @@ static void TranslateFunction(AstFunction func)
 		return;
 
 	TempNum = 0;
+	// DFG只能有一个入口和一个出口
 	FSYM->entryBB = CreateBBlock();
 	FSYM->exitBB = CreateBBlock();
 
 	CurrentBB = FSYM->entryBB;
 	TranslateStatement(func->stmt);
+	// 连接exit block
 	StartBBlock(FSYM->exitBB);
 
 	Optimize(FSYM);
