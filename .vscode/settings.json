@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "*.cu": "cpp",
-        "*.tpl": "c"
+        "*.tpl": "c",
+        "stdio.h": "c"
     }
 }

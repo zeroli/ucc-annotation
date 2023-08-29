@@ -5,18 +5,19 @@
 #include "ucc.h"
 
 #define _P_WAIT 0
-#define UCCDIR "/usr/local/lib/ucc/"
-#define BINDIR "/c/Apps/msys64/mingw64/bin/"
+#define UCLDIR "ucl/"
+#define GCCDIR "c:/Users/zeli/Apps/msys64/mingw64/"
+#define BINDIR GCCDIR "bin\\"
 
 static char *CPPProg[] =
 {
-	BINDIR "gcc", "-U__GNUC__", "-D_POSIX_SOURCE", "-D__STRICT_ANSI__",
+	BINDIR "gcc", "-D_POSIX_SOURCE", "-D__STRICT_ANSI__",
 	"-Dunix", "-Di386", "-Dlinux", "-D__unix__", "-D__i386__", "-D__linux__",
-	"-D__signed__=signed", "-D_UCC", "-I" UCCDIR "include", "$1", "-E", "$2", "-o", "$3", 0
+	"-D__signed__=signed", "-D_UCC", "-I" GCCDIR "include", "$1", "-E", "$2", "-o", "$3", 0
 };
 static char *CCProg[] =
 {
-	UCCDIR "ucl", "-ext:.s", "$1", "$2", 0
+	UCLDIR "ucl.exe", "-ext:.s", "$1", "$2", 0
 };
 static char *ASProg[] =
 {
@@ -24,9 +25,18 @@ static char *ASProg[] =
 };
 static char *LDProg[] =
 {
-	BINDIR "gcc", "-o", "$3", "$1", "$2", UCCDIR "assert.o", "-lc", "-lm", 0
+	BINDIR "gcc", "-o", "$3", "$1", "$2", UCLDIR "assert.o", "-lc", "-lm", 0
 };
 char *ExtNames[] = { ".c", ".i", ".s", ".o", ".a;.so", 0 };
+
+static int Execute(char **cmd)
+{
+    int status = _spawnvp(_P_WAIT, cmd[0], (const char* const*)cmd);
+    if (status != 0) {
+        perror("spawn process error:");
+    }
+    return status;
+}
 
 void SetupToolChain(void)
 {
@@ -52,7 +62,7 @@ int InvokeProgram(int oftype)
 
 		Option.pfiles = ListCombine(Option.pfiles, PPFiles);
 		cmd = BuildCommand(CPPProg, Option.pflags, Option.cfiles, PPFiles);
-		status = _spawnvp(_P_WAIT, cmd[0], cmd);
+		status = Execute(cmd);
 
 		for (p = PPFiles; p != NULL; p = p->next)
 		{
@@ -74,7 +84,7 @@ int InvokeProgram(int oftype)
 
 		Option.afiles = ListCombine(Option.afiles, ASMFiles);
 		cmd = BuildCommand(CCProg, Option.cflags, Option.pfiles, ASMFiles);
-		status = _spawnvp(_P_WAIT, cmd[0], cmd);
+		status = Execute(cmd);
 		break;
 
 	case OBJ_FILE:
@@ -90,7 +100,7 @@ int InvokeProgram(int oftype)
 			file = FileName(p->str, ".o");
 			OBJFiles = ListAppend(OBJFiles, file);
 			cmd = BuildCommand(ASProg, Option.aflags, ListAppend(NULL, p->str), ListAppend(NULL, file));
-			status = _spawnvp(_P_WAIT, cmd[0], cmd);
+			status = Execute(cmd);
 		}
 		Option.ofiles = ListCombine(Option.ofiles, OBJFiles);
 		break;
@@ -112,7 +122,7 @@ int InvokeProgram(int oftype)
 			Option.lflags = ListCombine(Option.lflags, ParseOption(p->str + 4));
 		}
 		cmd = BuildCommand(LDProg, Option.lflags, Option.linput, ListAppend(NULL, Option.out));
-		status = _spawnvp(_P_WAIT, cmd[0], cmd);
+		status = Execute(cmd);
 		break;
 	}
 

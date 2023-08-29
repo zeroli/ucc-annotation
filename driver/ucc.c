@@ -262,7 +262,7 @@ static void RemoveFiles(void)
 
 static void ShowHelp(void)
 {
-	char *msg[] = 
+	char *msg[] =
 	{
 		"Usage: ucc [options] (file | -xxx) ...\n",
 		"Options:\n",
@@ -288,7 +288,7 @@ static void ShowHelp(void)
 	{
 		printf(msg[i]);
 		i++;
-	}		
+	}
 }
 
 static int ParseCmdLine(int argc, char *argv[])
@@ -386,7 +386,7 @@ int main(int argc, char *argv[])
 		if (InvokeProgram(i) != 0)
 		{
 			RemoveFiles();
-			fprintf(stderr, "ucc invoke command error:");
+			fprintf(stderr, "ucc invoke command error:\n");
 			PrintCommand();
 			return -1;
 		}
