@@ -5,7 +5,7 @@
 #include "ucc.h"
 
 #define _P_WAIT 0
-#define UCLDIR "ucl/"
+#define UCLDIR "./ucl/"
 #define GCCDIR "c:/Users/zeli/Apps/msys64/mingw64/"
 #define BINDIR GCCDIR "bin\\"
 
@@ -21,7 +21,7 @@ static char *CCProg[] =
 };
 static char *ASProg[] =
 {
-	BINDIR "as", "-o", "$3", "$1", "$2", 0
+	BINDIR "gcc", "-o", "$3", "$1", "$2", 0
 };
 static char *LDProg[] =
 {
