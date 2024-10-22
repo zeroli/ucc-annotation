@@ -2,6 +2,8 @@
     "files.associations": {
         "*.cu": "cpp",
         "*.tpl": "c",
-        "stdio.h": "c"
-    }
+        "stdio.h": "c",
+        "opinfo.h": "c"
+    },
+    "iis.configDir": ""
 }

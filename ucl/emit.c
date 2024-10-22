@@ -83,7 +83,7 @@ static void EmitGlobals(void)
 		{
 			DefineCommData(p);
 		}
-		else 
+		else
 		{
 			DefineGlobal(p);
 			len = strlen(p->aname);
@@ -186,6 +186,7 @@ static void EmitFunctions(AstTranslationUnit transUnit)
 		if (p->kind == NK_Function)
 		{
 			fsym = ((AstFunction)p)->fsym;
+			// 全局的函数，或者被引用过的static函数
 			if (fsym->sclass != TK_STATIC || fsym->ref > 0)
 			{
 				EmitFunction(fsym);

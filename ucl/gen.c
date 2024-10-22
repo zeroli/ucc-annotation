@@ -214,7 +214,7 @@ void GenerateIndirectJump(BBlock *dstBBs, int len, Symbol index)
 void GenerateReturn(Type ty, Symbol src)
 {
 	IRInst inst;
-
+	// 把return表达式作为一个单独的指令来处理，之后再添加一个直接跳转到exit block
 	ALLOC(inst);
 	src->ref++;
 	inst->ty = ty;
@@ -293,7 +293,7 @@ Symbol Deref(Type ty, Symbol addr)
 
 Symbol TryAddValue(Type ty, int op, Symbol src1, Symbol src2)
 {
-	int h = ((unsigned)src1 + (unsigned)src2 + op) & 15;
+	int h = ((uintptr_t)src1 + (uintptr_t)src2 + op) & 15;
 	ValueDef def = FSYM->valNumTable[h];
 	Symbol t;
 

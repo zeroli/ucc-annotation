@@ -121,6 +121,7 @@ static void TranslateIfStatement(AstStatement stmt)
 	BBlock trueBB;
 	BBlock falseBB;
 
+	// if/else语句的翻译非常清晰，易读！！！
 	nextBB = CreateBBlock();
 	trueBB = CreateBBlock();
 
@@ -164,6 +165,24 @@ static void TranslateWhileStatement(AstStatement stmt)
 {
 	AstLoopStatement whileStmt = AsLoop(stmt);
 
+/** 另一种translate？
+ * contBB:
+ *   if (not expr) goto nextBB
+ * loopBB:
+ * 	stmt
+ * 	go to contBB
+ * nextBB:
+ * 	...
+ *
+ * 	StartBBlock(whileStmt->contBB);
+	TranslateBranch(NOT(whileStmt->expr), whileStmt->nextBB, whileStmt->loopBB);
+
+	StartBBlock(whileStmt->loopBB);
+	TranslateStatement(whileStmt->stmt);
+	GenerateJump(whileStmt->contBB);
+
+	StartBBlock(whileStmt->nextBB);
+ */
 	whileStmt->loopBB = CreateBBlock();
 	whileStmt->contBB = CreateBBlock();
 	whileStmt->nextBB = CreateBBlock();
@@ -617,7 +636,7 @@ static void TranslateFunction(AstFunction func)
 		return;
 
 	TempNum = 0;
-	// DFG只能有一个入口和一个出口
+	// CFG只能有一个入口和一个出口
 	FSYM->entryBB = CreateBBlock();
 	FSYM->exitBB = CreateBBlock();
 

@@ -10,7 +10,7 @@ extern int SwitchTableNum;
 enum ASMCode
 {
 #define TEMPLATE(code, str) code,
-#include "x86win32.tpl"
+#include "x86linux.tpl"
 #undef TEMPLATE
 };
 
@@ -63,7 +63,7 @@ static void ModifyVar(Symbol p)
 	p->needwb = 0;
 	reg = p->reg;
 	SpillReg(reg);
-	
+
 	AddVarToReg(reg, p);
 	p->needwb = 1;
 }
@@ -89,8 +89,8 @@ static void AllocateReg(IRInst inst, int index)
 		return;
 	}
 
-	/// in x86, the first source operand is also destination operand, 
-	/// reuse the first source operand's register if the first source operand 
+	/// in x86, the first source operand is also destination operand,
+	/// reuse the first source operand's register if the first source operand
 	/// will not be used after this instruction
 	if (index == 0 && SRC1->ref == 1 && SRC1->reg != NULL)
 	{
@@ -100,7 +100,7 @@ static void AllocateReg(IRInst inst, int index)
 		return;
 	}
 
-	/// get a register, if the operand is not destination operand, load the 
+	/// get a register, if the operand is not destination operand, load the
 	/// variable into the register
 	reg = GetReg();
 	if (index != 0)
@@ -111,7 +111,7 @@ static void AllocateReg(IRInst inst, int index)
 }
 
 /**
- * Before executing an float instruction, UCC ensures that only TOP register of x87 stack 
+ * Before executing an float instruction, UCC ensures that only TOP register of x87 stack
  * may be used. And whenenver a basic block ends, save the x87 stack top if needed. Thus
  * we can assure that when entering and leaving each basic block, the x87 register stack
  * is in init status.
@@ -521,7 +521,7 @@ static void EmitBranch(IRInst inst)
 	}
 
 	assert(tcode >= I4);
-	
+
 	if (SRC2)
 	{
 		if (SRC2->kind != SK_Constant)
@@ -549,7 +549,7 @@ static void EmitJump(IRInst inst)
 
 	DST = p->sym;
 	ClearRegs();
-	PutASMCode(X86_JMP, inst->opds); 
+	PutASMCode(X86_JMP, inst->opds);
 }
 
 static void EmitIndirectJump(IRInst inst)
@@ -559,7 +559,7 @@ static void EmitIndirectJump(IRInst inst)
 	int len;
 	Symbol reg;
 
-	
+
 	SRC1->ref--;
 	p = (BBlock *)DST;
 	reg = PutInReg(SRC1);
@@ -727,7 +727,7 @@ static void EmitCall(IRInst inst)
 		PutASMCode(X86_STF4 + (rty->categ != FLOAT), inst->opds);
 		return;
 	}
-	
+
 	switch (rty->size)
 	{
 	case 1:
@@ -818,9 +818,9 @@ static void EmitNOP(IRInst inst)
 	assert(0);
 }
 
-static void (* Emitter[])(IRInst inst) = 
+static void (* Emitter[])(IRInst inst) =
 {
-#define OPCODE(code, name, func) Emit##func, 
+#define OPCODE(code, name, func) Emit##func,
 #include "opcode.h"
 #undef OPCODE
 };
@@ -829,6 +829,7 @@ static void EmitIRInst(IRInst inst)
 {
 	struct irinst instc = *inst;
 
+	// 查表，转调用到opcode对应的emit函数
 	(* Emitter[inst->opcode])(&instc);
 	return;
 }
@@ -839,7 +840,7 @@ static void EmitBBlock(BBlock bb)
 
 	while (inst != &bb->insth)
 	{
-		UsedRegs = 0;
+		UsedRegs = 0;  // 每条指令emit时，重置
 		EmitIRInst(inst);
 		if (! (inst->opcode >= JZ && inst->opcode <= IJMP) &&
 		    inst->opcode != CALL)
@@ -850,6 +851,7 @@ static void EmitBBlock(BBlock bb)
 		}
 		inst = inst->next;
 	}
+	// 一个block结束时，需要将所有的寄存器全部重置，写回原来的内存
 	ClearRegs();
 	SaveX87Top();
 }
@@ -927,7 +929,7 @@ void EmitFunction(FunctionSymbol fsym)
 		p->ty = T(POINTER);
 		p->level = 1;
 		p->sclass = TK_AUTO;
-		
+
 		p->next = fsym->params;
 		fsym->params = (Symbol)p;
 	}
@@ -955,4 +957,3 @@ void StoreVar(Symbol reg, Symbol v)
 {
 	Move(X86_MOVI4, v, reg);
 }
-

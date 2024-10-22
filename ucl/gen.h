@@ -17,6 +17,7 @@ typedef struct irinst
 	Type ty;
 	// 3地址码操作指令
 	int opcode;
+	// [0]: dest, [1]/[2]: src
 	Symbol opds[3];
 } *IRInst;
 
@@ -32,10 +33,12 @@ struct bblock
 	struct bblock *prev;
 	struct bblock *next;
 	Symbol sym;
-	// 每个block有前驱和后继
+	// 每个block有前驱和后继edges
+	// 这些edges形成单向链表
 	CFGEdge succs;
 	CFGEdge preds;
 	// block当然有指令序列，双向链表
+	// `insth`是头，从而形成双向循环链表
 	struct irinst insth;
 	int ninst;
 	int nsucc;

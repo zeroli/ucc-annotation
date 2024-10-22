@@ -12,7 +12,7 @@ int UsedRegs;
 static int FindEmptyReg(int endr)
 {
 	int i;
-	
+
 	for (i = EAX; i <= endr; ++i)
 	{
 		if (X86Regs[i] != NULL && X86Regs[i]->link == NULL && ! (1 << i & UsedRegs))
@@ -44,6 +44,7 @@ static int SelectSpillReg(int endr)
 			}
 			p = p->link;
 		}
+		// 选择一个负载最小的register来unload
 		if (ref < mref)
 		{
 			mref = ref;
@@ -153,4 +154,3 @@ Symbol CreateReg(char *name, char *iname, int no)
 
 	return reg;
 }
-
